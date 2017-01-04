@@ -2,13 +2,14 @@
 a python log statistic tool
 
 ## configuration
-pyLogStatistic support two types of log.
+pyLogStatistic supports two types of log.
 ### syslog type
 	datetime=1900/01/01 00:00:01,srcip=192.168.0.1,dstip=192.168.0.254,..
 ### csv type
 	datetime,srcip,dstip,..
 	1900/01/01 00:00:01,192.168.0.1,192.168.0.254,..
 Please edit settings.conf to suits your needs.  
+if you provide input_malicious_ip or input_client_ip, each IP will be mapped to its corresponding name via <belongs> tag.  
 Also, you MUST specify every single column name in settings.conf
 
 ## usage
