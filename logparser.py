@@ -31,7 +31,7 @@ class csvFormatter:
 		self.action_name = config['CSV']['action']
 		if config.has_option('CSV', 'aggregation'):
 			self.aggregation_name = config['CSV']['aggregation']
-                else:
+		else:
 			self.aggregation_name = ''
 
 class rangeMapper:
