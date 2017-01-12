@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import xml.etree.ElementTree as ET
-from parser import rangeMapper
+from logparser import rangeMapper
 
 class xmlOutputter:
 	def __init__(self, conn, config):
@@ -129,4 +129,4 @@ class xmlOutputter:
 		self.add_top10_belongs()
 		if self.config.getboolean('OUTPUT', 'malicious_entry'):
 			self.malicious_entry()
-		ET.ElementTree(self.root).write(self.config['OUTPUT']['xml'])
+		ET.ElementTree(self.root).write(self.config['OUTPUT']['xml'], encoding='UTF-8')

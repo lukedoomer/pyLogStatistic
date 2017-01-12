@@ -31,13 +31,15 @@ class csvFormatter:
 		self.action_name = config['CSV']['action']
 		if config.has_option('CSV', 'aggregation'):
 			self.aggregation_name = config['CSV']['aggregation']
+                else:
+			self.aggregation_name = ''
 
 class rangeMapper:
 	def __init__(self, config):
 		self.malicious_ip_range = list()
 		self.client_ip_range = list()
 		if config.has_option('DEFAULT', 'input_malicious_ip'):
-			with open(config['DEFAULT']['input_malicious_ip'], 'r') as malicious_ip:
+			with open(config['DEFAULT']['input_malicious_ip'], mode='r', encoding='utf-8') as malicious_ip:
 				for line in malicious_ip:
 					line = line.rstrip()
 					try:
@@ -46,7 +48,7 @@ class rangeMapper:
 						continue
 					self.malicious_ip_range.append(tuple(network.split('-')) + (name,))
 		if config.has_option('DEFAULT', 'input_client_ip'):
-			with open(config['DEFAULT']['input_client_ip'], 'r') as client_ip:
+			with open(config['DEFAULT']['input_client_ip'], mode='r', encoding='utf-8') as client_ip:
 				for line in client_ip:
 					line = line.rstrip()
 					name, network = line.split(':')
