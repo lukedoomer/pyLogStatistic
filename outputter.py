@@ -109,13 +109,29 @@ class xmlOutputter:
 		entry = ET.SubElement(self.root, 'malicious_entry')
 		i = 0
 		for row in self.conn.cursor().execute('SELECT source_ip, destination_ip FROM syslog GROUP BY source_ip, destination_ip'):
-			if not self.mapper.client_check(row[0]): source_malicious_name = self.mapper.malicious_check(row[0])
-			if not self.mapper.client_check(row[1]): destination_malicious_name = self.mapper.malicious_check(row[1])
-			if 'source_malicious_name' in locals() or 'destination_malicious_name' in locals():
-				for row2 in self.conn.cursor().execute('SELECT filename, line_number FROM syslog WHERE source_ip=? AND destination_ip=?', row):
+			if self.mapper.client_check(row[0]):
+				source_malicious_name = None
+			else:
+				source_malicious_name = self.mapper.malicious_check(row[0])
+			if self.mapper.client_check(row[1]):
+				destination_malicious_name = None
+			else:
+				destination_malicious_name = self.mapper.malicious_check(row[1])
+			if source_malicious_name or destination_malicious_name:
+				for row2 in self.conn.cursor().execute('SELECT * FROM syslog WHERE source_ip=? AND destination_ip=?', row):
 					i = i + 1
 					group_node = ET.SubElement(entry, 'group', attrib={'index': str(i)})
-					group_node.text = linecache.getline(row2[0], row2[1])
+					ET.SubElement(group_node, 'name').text = str(row2[2])
+					source_node = ET.SubElement(group_node, 'src_ip')
+					source_node.text = str(row2[3])
+					if source_malicious_name: source_node.set('belongs', source_malicious_name)
+					destination_node = ET.SubElement(group_node, 'dst_ip')
+					destination_node.text = str(row2[4])
+					if destination_malicious_name: destination_node.set('belongs', destination_malicious_name)
+					ET.SubElement(group_node, 'destination_port').text = str(row2[5])
+					ET.SubElement(group_node, 'action').text = str(row2[6])
+					ET.SubElement(group_node, 'aggregation').text = str(row2[7])
+					ET.SubElement(group_node, 'rawdata').text = linecache.getline(row2[0], row2[1]).rstrip()
 		self.timer.stop()
 
 	def map_top10_belongs(self):
