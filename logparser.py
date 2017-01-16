@@ -33,6 +33,8 @@ class rangeMapper:
 	def __init__(self, config):
 		self.malicious_ip_range = list()
 		self.client_ip_range = list()
+		self.processed_malicious_ip = dict()
+		self.processed_client_ip = dict()
 		if config.has_option('DEFAULT', 'input_malicious_ip'):
 			with open(config['DEFAULT']['input_malicious_ip'], mode='r', encoding='utf-8') as malicious_ip:
 				for line in malicious_ip:
@@ -48,22 +50,28 @@ class rangeMapper:
 					line = line.rstrip()
 					name, network = line.split(':')
 					self.client_ip_range.append(tuple(network.split('-')) + (name,))
-		self.all_ip_range = self.malicious_ip_range + self.client_ip_range
 
 	def check(self, ip):
-		for ip_range in self.all_ip_range:
-			if ipaddress.IPv4Address(ip_range[0]) <= ipaddress.IPv4Address(ip) <= ipaddress.IPv4Address(ip_range[1]):
-				return ip_range[2]
-		return None
+		client_result = self.client_check(ip)
+		if client_result:
+			return client_result
+		else:
+			return self.malicious_check(ip)
 
 	def client_check(self, ip):
-		for ip_range in self.client_ip_range:
-			if ipaddress.IPv4Address(ip_range[0]) <= ipaddress.IPv4Address(ip) <= ipaddress.IPv4Address(ip_range[1]):
-				return ip_range[2]
-		return None
+		if ip not in self.processed_client_ip:
+			self.processed_client_ip[ip] = None
+			for ip_range in self.client_ip_range:
+				if ipaddress.IPv4Address(ip_range[0]) <= ipaddress.IPv4Address(ip) <= ipaddress.IPv4Address(ip_range[1]):
+					self.processed_client_ip[ip] = ip_range[2]
+					break
+		return self.processed_client_ip[ip]
 
 	def malicious_check(self, ip):
-		for ip_range in self.malicious_ip_range:
-			if ipaddress.IPv4Address(ip_range[0]) <= ipaddress.IPv4Address(ip) <= ipaddress.IPv4Address(ip_range[1]):
-				return ip_range[2]
-		return None
+		if ip not in self.processed_malicious_ip:
+			self.processed_malicious_ip[ip] = None
+			for ip_range in self.malicious_ip_range:
+				if ipaddress.IPv4Address(ip_range[0]) <= ipaddress.IPv4Address(ip) <= ipaddress.IPv4Address(ip_range[1]):
+					self.processed_malicious_ip[ip] = ip_range[2]
+					break
+		return self.processed_malicious_ip[ip]
