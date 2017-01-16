@@ -16,11 +16,11 @@ timer = status.Timer()
 conn = sqlite3.connect(config['OUTPUT']['db'])
 conn.cursor().execute('''CREATE TABLE IF NOT EXISTS syslog (filename text, line_number numeric, name text, source_ip text, destination_ip text, destination_port numeric, action text, aggregation numeric)''')
 
-for filename in args.FILE:
-	timer.start('Processing ' + filename)
-	i = 0
-	if config['DEFAULT']['log_type'] == 'syslog':
-		syslog_parser = logparser.syslogParser(config)
+if config['DEFAULT']['log_type'] == 'syslog':
+	syslog_parser = logparser.syslogParser(config)
+	for filename in args.FILE:
+		timer.start('Processing ' + filename)
+		i = 0
 		with open(filename, mode='r', errors='ignore', encoding='utf-8') as logfile:
 			for line in logfile:
 				i = i + 1
@@ -32,8 +32,12 @@ for filename in args.FILE:
 				if name and source_ip and destination_ip and destination_port and action:
 					entry = (filename, i, name.group(1), source_ip.group(1), destination_ip.group(1), destination_port.group(1), action.group(1), 1)
 					conn.cursor().execute('INSERT INTO syslog VALUES (?, ?, ?, ?, ?, ?, ?, ?)', entry)
-	elif config['DEFAULT']['log_type'] == 'csv':
-		csv_formatter = logparser.csvFormatter(config)
+		timer.stop()
+elif config['DEFAULT']['log_type'] == 'csv':
+	csv_formatter = logparser.csvFormatter(config)
+	for filename in args.FILE:
+		timer.start('Processing ' + filename)
+		i = 1
 		with open(filename, mode='r', encoding='utf-8') as logfile:
 			reader = csv.DictReader(logfile, delimiter=csv_formatter.delimiter)
 			for row in reader:
@@ -41,7 +45,7 @@ for filename in args.FILE:
 				if row[csv_formatter.name_name] and row[csv_formatter.source_ip_name] and row[csv_formatter.destination_ip_name] and row[csv_formatter.destination_port_name] and row[csv_formatter.action_name]:
 					entry = (filename, i, row[csv_formatter.name_name], row[csv_formatter.source_ip_name], row[csv_formatter.destination_ip_name], row[csv_formatter.destination_port_name], row[csv_formatter.action_name], row[csv_formatter.aggregation_name] if hasattr(csv_formatter, 'aggregation_name') else 1)
 					conn.cursor().execute('INSERT INTO syslog VALUES (?, ?, ?, ?, ?, ?, ?, ?)', entry)
-	timer.stop()
+		timer.stop()
 
 conn.commit()
 result = outputter.xmlOutputter(conn, config)
