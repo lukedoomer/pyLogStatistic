@@ -38,7 +38,7 @@ elif config['DEFAULT']['log_type'] == 'csv':
 	for filename in args.FILE:
 		timer.start('Processing ' + filename)
 		i = 1
-		with open(filename, mode='r', encoding='utf-8') as logfile:
+		with open(filename, mode='r', errors='ignore', encoding='utf-8') as logfile:
 			reader = csv.DictReader(logfile, delimiter=csv_formatter.delimiter)
 			for row in reader:
 				i = i + 1

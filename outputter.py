@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-import linecache
 import xml.etree.ElementTree as ET
 from logparser import rangeMapper
 import status
@@ -131,7 +130,12 @@ class xmlOutputter:
 					ET.SubElement(group_node, 'destination_port').text = str(row2[5])
 					ET.SubElement(group_node, 'action').text = str(row2[6])
 					ET.SubElement(group_node, 'aggregation').text = str(row2[7])
-					ET.SubElement(group_node, 'rawdata').text = linecache.getline(row2[0], row2[1]).rstrip()
+					with open(row2[0], mode='r', errors='ignore', encoding='utf-8') as logfile:
+						row2[1] -= 1
+						for number, line in enumerate(logfile):
+							if number == row2[1]:
+								ET.SubElement(group_node, 'rawdata').text = line.rstrip()
+								break
 		self.timer.stop()
 
 	def map_top10_belongs(self):
