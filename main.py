@@ -9,7 +9,7 @@ arg_parser.add_argument('FILE', help='a list of files', nargs='+')
 args = arg_parser.parse_args()
 
 config = configparser.ConfigParser()
-config.read('settings.conf')
+config.read('settings.conf', encoding='utf-8')
 
 timer = status.Timer()
 

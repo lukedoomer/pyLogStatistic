@@ -61,17 +61,27 @@ class rangeMapper:
 	def client_check(self, ip):
 		if ip not in self.processed_client_ip:
 			self.processed_client_ip[ip] = None
-			for ip_range in self.client_ip_range:
-				if ipaddress.IPv4Address(ip_range[0]) <= ipaddress.IPv4Address(ip) <= ipaddress.IPv4Address(ip_range[1]):
-					self.processed_client_ip[ip] = ip_range[2]
-					break
+			try:
+				ip_object = ipaddress.IPv4Address(ip)
+			except ValueError:
+				pass
+			else:
+				for ip_range in self.client_ip_range:
+					if ipaddress.IPv4Address(ip_range[0]) <= ipaddress.IPv4Address(ip) <= ipaddress.IPv4Address(ip_range[1]):
+						self.processed_client_ip[ip] = ip_range[2]
+						break
 		return self.processed_client_ip[ip]
 
 	def malicious_check(self, ip):
 		if ip not in self.processed_malicious_ip:
 			self.processed_malicious_ip[ip] = None
-			for ip_range in self.malicious_ip_range:
-				if ipaddress.IPv4Address(ip_range[0]) <= ipaddress.IPv4Address(ip) <= ipaddress.IPv4Address(ip_range[1]):
-					self.processed_malicious_ip[ip] = ip_range[2]
-					break
+			try:
+				ip_object = ipaddress.IPv4Address(ip)
+			except ValueError:
+				pass
+			else:
+				for ip_range in self.malicious_ip_range:
+					if ipaddress.IPv4Address(ip_range[0]) <= ipaddress.IPv4Address(ip) <= ipaddress.IPv4Address(ip_range[1]):
+						self.processed_malicious_ip[ip] = ip_range[2]
+						break
 		return self.processed_malicious_ip[ip]
