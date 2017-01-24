@@ -131,9 +131,9 @@ class xmlOutputter:
 					ET.SubElement(group_node, 'action').text = str(row2[6])
 					ET.SubElement(group_node, 'aggregation').text = str(row2[7])
 					with open(row2[0], mode='r', errors='ignore', encoding='utf-8') as logfile:
-						row2[1] -= 1
+						actual_number = row2[1] - 1
 						for number, line in enumerate(logfile):
-							if number == row2[1]:
+							if number == actual_number:
 								ET.SubElement(group_node, 'rawdata').text = line.rstrip()
 								break
 		self.timer.stop()
