@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import sqlite3, re, configparser, csv, argparse
+import sqlite3, re, configparser, csv, argparse, ipaddress
 import logparser, outputter, status
 from collections import OrderedDict
 
@@ -42,6 +42,11 @@ elif config['DEFAULT']['log_type'] == 'csv':
 			reader = csv.DictReader(logfile, delimiter=csv_formatter.delimiter)
 			for row in reader:
 				i = i + 1
+				try:
+					ipaddress.IPv4Address(row[csv_formatter.source_ip_name])
+					ipaddress.IPv4Address(row[csv_formatter.destination_ip_name])
+				except ValueError:
+					continue
 				if row[csv_formatter.name_name] and row[csv_formatter.source_ip_name] and row[csv_formatter.destination_ip_name] and row[csv_formatter.destination_port_name] and row[csv_formatter.action_name]:
 					entry = (filename, i, row[csv_formatter.name_name], row[csv_formatter.source_ip_name], row[csv_formatter.destination_ip_name], row[csv_formatter.destination_port_name], row[csv_formatter.action_name], row[csv_formatter.aggregation_name] if hasattr(csv_formatter, 'aggregation_name') else 1)
 					conn.cursor().execute('INSERT INTO syslog VALUES (?, ?, ?, ?, ?, ?, ?, ?)', entry)

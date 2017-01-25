@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import re, ipaddress
+import re, ipaddress, csv
 
 class syslogParser:
 	def __init__(self, config):
@@ -33,23 +33,18 @@ class rangeMapper:
 	def __init__(self, config):
 		self.malicious_ip_range = list()
 		self.client_ip_range = list()
-		self.processed_malicious_ip = dict()
 		self.processed_client_ip = dict()
 		if config.has_option('DEFAULT', 'input_malicious_ip'):
 			with open(config['DEFAULT']['input_malicious_ip'], mode='r', encoding='utf-8') as malicious_ip:
-				for line in malicious_ip:
-					line = line.rstrip()
-					try:
-						name, network = line.split(':')
-					except ValueError:
-						continue
-					self.malicious_ip_range.append(tuple(network.split('-')) + (name,))
+				malicious_csv = csv.DictReader(malicious_ip, delimiter=',')
+				for line in malicious_csv:
+					self.malicious_ip_range.append(line['DN/IP-List'])
 		if config.has_option('DEFAULT', 'input_client_ip'):
 			with open(config['DEFAULT']['input_client_ip'], mode='r', encoding='utf-8') as client_ip:
 				for line in client_ip:
 					line = line.rstrip()
 					name, network = line.split(':')
-					self.client_ip_range.append(tuple(network.split('-')) + (name,))
+					self.client_ip_range.append(tuple(network.split('~')) + (name,))
 
 	def check(self, ip):
 		client_result = self.client_check(ip)
@@ -61,27 +56,14 @@ class rangeMapper:
 	def client_check(self, ip):
 		if ip not in self.processed_client_ip:
 			self.processed_client_ip[ip] = None
-			try:
-				ip_object = ipaddress.IPv4Address(ip)
-			except ValueError:
-				pass
-			else:
-				for ip_range in self.client_ip_range:
-					if ipaddress.IPv4Address(ip_range[0]) <= ipaddress.IPv4Address(ip) <= ipaddress.IPv4Address(ip_range[1]):
-						self.processed_client_ip[ip] = ip_range[2]
-						break
+			for ip_range in self.client_ip_range:
+				if ipaddress.IPv4Address(ip_range[0]) <= ipaddress.IPv4Address(ip) <= ipaddress.IPv4Address(ip_range[1]):
+					self.processed_client_ip[ip] = ip_range[2]
+					break
 		return self.processed_client_ip[ip]
 
 	def malicious_check(self, ip):
-		if ip not in self.processed_malicious_ip:
-			self.processed_malicious_ip[ip] = None
-			try:
-				ip_object = ipaddress.IPv4Address(ip)
-			except ValueError:
-				pass
-			else:
-				for ip_range in self.malicious_ip_range:
-					if ipaddress.IPv4Address(ip_range[0]) <= ipaddress.IPv4Address(ip) <= ipaddress.IPv4Address(ip_range[1]):
-						self.processed_malicious_ip[ip] = ip_range[2]
-						break
-		return self.processed_malicious_ip[ip]
+		if ip in self.malicious_ip_range:
+			return 'ICST & Hinet Malicious List'
+		else:
+			return None
