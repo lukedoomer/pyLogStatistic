@@ -2,6 +2,14 @@
 
 import re, ipaddress, csv
 
+def ip_validate(ip):
+	try:
+		ipaddress.IPv4Address(ip)
+	except ValueError:
+		return False
+	else:
+		return True
+
 class syslogParser:
 	def __init__(self, config):
 		delimiter = config['DEFAULT']['delimiter']
@@ -17,6 +25,7 @@ class syslogParser:
 		self.destination_ip_re = re.compile(destination_ip_name + '=([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})[$' + delimiter + ']')
 		self.destination_port_re = re.compile(destination_port_name + '=([0-9]{1,5})[$' + delimiter + ']')
 		self.action_re = re.compile(action_name + '=([a-zA-Z]*?)[$' + delimiter + ']')
+syslogParser.ip_validate = staticmethod(ip_validate)
 
 class csvFormatter:
 	def __init__(self, config):
@@ -28,6 +37,7 @@ class csvFormatter:
 		self.action_name = config['CSV']['action']
 		if config.has_option('CSV', 'aggregation'):
 			self.aggregation_name = config['CSV']['aggregation']
+csvFormatter.ip_validate = staticmethod(ip_validate)
 
 class rangeMapper:
 	def __init__(self, config):

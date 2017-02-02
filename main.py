@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import sqlite3, re, configparser, csv, argparse, ipaddress
+import sqlite3, re, configparser, csv, argparse
 import logparser, outputter, status
 from collections import OrderedDict
 
@@ -29,7 +29,7 @@ if config['DEFAULT']['log_type'] == 'syslog':
 				destination_ip = syslog_parser.destination_ip_re.search(line)
 				destination_port = syslog_parser.destination_port_re.search(line)
 				action = syslog_parser.action_re.search(line)
-				if name and source_ip and destination_ip and destination_port and action:
+				if name and syslog_parser.ip_validate(source_ip) and syslog_parser.ip_validate(destination_ip) and destination_port and action:
 					entry = (filename, i, name.group(1), source_ip.group(1), destination_ip.group(1), destination_port.group(1), action.group(1), 1)
 					conn.cursor().execute('INSERT INTO syslog VALUES (?, ?, ?, ?, ?, ?, ?, ?)', entry)
 		timer.stop()
@@ -42,12 +42,7 @@ elif config['DEFAULT']['log_type'] == 'csv':
 			reader = csv.DictReader(logfile, delimiter=csv_formatter.delimiter)
 			for row in reader:
 				i = i + 1
-				try:
-					ipaddress.IPv4Address(row[csv_formatter.source_ip_name])
-					ipaddress.IPv4Address(row[csv_formatter.destination_ip_name])
-				except ValueError:
-					continue
-				if row[csv_formatter.name_name] and row[csv_formatter.source_ip_name] and row[csv_formatter.destination_ip_name] and row[csv_formatter.destination_port_name] and row[csv_formatter.action_name]:
+				if row[csv_formatter.name_name] and csv_formatter.ip_validate(row[csv_formatter.source_ip_name]) and csv_formatter.ip_validate(row[csv_formatter.destination_ip_name]) and row[csv_formatter.destination_port_name] and row[csv_formatter.action_name]:
 					entry = (filename, i, row[csv_formatter.name_name], row[csv_formatter.source_ip_name], row[csv_formatter.destination_ip_name], row[csv_formatter.destination_port_name], row[csv_formatter.action_name], row[csv_formatter.aggregation_name] if hasattr(csv_formatter, 'aggregation_name') else 1)
 					conn.cursor().execute('INSERT INTO syslog VALUES (?, ?, ?, ?, ?, ?, ?, ?)', entry)
 		timer.stop()
