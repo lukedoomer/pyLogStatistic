@@ -65,7 +65,7 @@ class rangeMapper:
 
 	def client_check(self, ip):
 		if ip not in self.processed_client_ip:
-			self.processed_client_ip[ip] = None
+			self.processed_client_ip[ip] = ''
 			for ip_range in self.client_ip_range:
 				if ipaddress.IPv4Address(ip_range[0]) <= ipaddress.IPv4Address(ip) <= ipaddress.IPv4Address(ip_range[1]):
 					self.processed_client_ip[ip] = ip_range[2]
@@ -76,4 +76,4 @@ class rangeMapper:
 		if ip in self.malicious_ip_range:
 			return 'ICST & Hinet Malicious List'
 		else:
-			return None
+			return ''

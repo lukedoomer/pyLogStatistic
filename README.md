@@ -12,7 +12,7 @@ Please edit settings.conf to suits your needs.
 You MUST specify every single column name in settings.conf
 Also, if you provide input_malicious_ip or input_client_ip, each IP will be mapped to its corresponding name via <belongs> tag.  
 ### format of input_client_ip
-        name:beginning_ip-endip
+	name:begin_ip~end_ip
 ### format of input_malicious_ip
 	DN/IP-List
 	1.1.1.1
@@ -29,3 +29,7 @@ and a XML-formatted result file including various top10 statistics.
 4. top10_destination_port  
 5. top10_action  
 6. malicious_entry (if malicious_entry = yes in settings.conf)
+
+## SQLite Table Schema
+	CREATE TABLE IF NOT EXISTS syslog (filename text, line_number numeric, name text, source_ip text, destination_ip text, destination_port numeric, action text, aggregation numeric)
+value of aggregation will be 1 if there is no aggregation column
