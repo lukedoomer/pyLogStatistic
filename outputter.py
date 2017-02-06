@@ -16,7 +16,7 @@ class xmlOutputter:
 	def top10_source_ip(self):
 		self.timer.start('Producing top10_source_ip')
 		top10_xml = ET.SubElement(self.root, 'top10_source_ip')
-		top10_html = '<h1 id="top10_source_ip">top10_source_ip</h1><br><table border="1"><tr><td>rank</td><td>source_ip</td><td>sum</td><td>group</td></tr>'
+		top10_html = '<h1 id="top10_source_ip">十大來源IP</h1><br><table border="1"><tr><td>排名</td><td>來源IP</td><td>總和</td><td>群組</td></tr>'
 		i = 0
 		for row in self.conn.cursor().execute('SELECT source_ip, sum(aggregation) FROM syslog GROUP BY source_ip ORDER BY sum(aggregation) DESC LIMIT 10'):
 			j = 0
@@ -24,7 +24,7 @@ class xmlOutputter:
 			top10_node = ET.SubElement(top10_xml, 'source_ip', attrib={'rank': str(i), 'sum': str(row[1]), 'belongs': self.mapper.check(row[0])})
 			top10_node.text = str(row[0])
 			top10_html += '<tr><td>{}</td><td>{}</td><td>{}</td>'.format(i, row[0] + '<br>' + self.mapper.check(row[0]), row[1])
-			top10_html += '<td><table border="1"><tr><td>rank</td><td>destination_ip</td><td>destination_port</td><td>action</td><td>total</td></tr>'
+			top10_html += '<td><table border="1"><tr><td>排名</td><td>目標IP</td><td>目標Port</td><td>動作</td><td>合計</td></tr>'
 			for row2 in self.conn.cursor().execute('SELECT destination_ip, destination_port, action, sum(aggregation) FROM syslog WHERE source_ip=? GROUP BY destination_ip, destination_port, action ORDER BY sum(aggregation) DESC LIMIT 10', (row[0],)):
 				j = j + 1
 				group_node = ET.SubElement(top10_node, 'group', attrib={'rank': str(j)})
@@ -41,7 +41,7 @@ class xmlOutputter:
 	def top10_destination_ip(self):
 		self.timer.start('Producing top10_destination_ip')
 		top10_xml = ET.SubElement(self.root, 'top10_destination_ip')
-		top10_html = '<h1 id="top10_destination_ip">top10_destination_ip</h1><br><table border="1"><tr><td>rank</td><td>destination_ip</td><td>sum</td><td>group</td></tr>'
+		top10_html = '<h1 id="top10_destination_ip">十大目標IP</h1><br><table border="1"><tr><td>排名</td><td>目標IP</td><td>總和</td><td>群組</td></tr>'
 		i = 0
 		for row in self.conn.cursor().execute('SELECT destination_ip, sum(aggregation) FROM syslog GROUP BY destination_ip ORDER BY sum(aggregation) DESC LIMIT 10'):
 			j = 0
@@ -49,7 +49,7 @@ class xmlOutputter:
 			top10_node = ET.SubElement(top10_xml, 'destination_ip', attrib={'rank': str(i), 'sum': str(row[1]), 'belongs': self.mapper.check(row[0])})
 			top10_node.text = str(row[0])
 			top10_html += '<tr><td>{}</td><td>{}</td><td>{}</td>'.format(i, row[0] + '<br>' + self.mapper.check(row[0]), row[1])
-			top10_html += '<td><table border="1"><tr><td>rank</td><td>source_ip</td><td>destination_port</td><td>action</td><td>total</td></tr>'
+			top10_html += '<td><table border="1"><tr><td>排名</td><td>來源IP</td><td>目標Port</td><td>動作</td><td>合計</td></tr>'
 			for row2 in self.conn.cursor().execute('SELECT source_ip, destination_port, action, sum(aggregation) FROM syslog WHERE destination_ip=? GROUP BY source_ip, destination_port, action ORDER BY sum(aggregation) DESC LIMIT 10', (row[0],)):
 				j = j + 1
 				group_node = ET.SubElement(top10_node, 'group', attrib={'rank': str(j)})
@@ -66,7 +66,7 @@ class xmlOutputter:
 	def top10_destination_port(self):
 		self.timer.start('Producing top10_destination_port')
 		top10_xml = ET.SubElement(self.root, 'top10_destination_port')
-		top10_html = '<h1 id="top10_destination_port">top10_destination_port</h1><br><table border="1"><tr><td>rank</td><td>destination_port</td><td>sum</td><td>group</td></tr>'
+		top10_html = '<h1 id="top10_destination_port">十大目標Port</h1><br><table border="1"><tr><td>排名</td><td>目標Port</td><td>總和</td><td>群組</td></tr>'
 		i = 0
 		for row in self.conn.cursor().execute('SELECT destination_port, sum(aggregation) FROM syslog GROUP BY destination_port ORDER BY sum(aggregation) DESC LIMIT 10'):
 			j = 0
@@ -74,7 +74,7 @@ class xmlOutputter:
 			top10_node = ET.SubElement(top10_xml, 'destination_port', attrib={'rank': str(i), 'sum': str(row[1])})
 			top10_node.text = str(row[0])
 			top10_html += '<tr><td>{}</td><td>{}</td><td>{}</td>'.format(i, row[0], row[1])
-			top10_html += '<td><table border="1"><tr><td>rank</td><td>source_ip</td><td>destination_ip</td><td>action</td><td>total</td></tr>'
+			top10_html += '<td><table border="1"><tr><td>排名</td><td>來源IP</td><td>目標IP</td><td>動作</td><td>合計</td></tr>'
 			for row2 in self.conn.cursor().execute('SELECT source_ip, destination_ip, action, sum(aggregation) FROM syslog WHERE destination_port=? GROUP BY source_ip, destination_ip, action ORDER BY sum(aggregation) DESC LIMIT 10', (row[0],)):
 				j = j + 1
 				group_node = ET.SubElement(top10_node, 'group', attrib={'rank': str(j)})
@@ -91,7 +91,7 @@ class xmlOutputter:
 	def top10_action(self):
 		self.timer.start('Producing top10_action')
 		top10_xml = ET.SubElement(self.root, 'top10_action')
-		top10_html = '<h1 id="top10_action">top10_action</h1><br><table border="1"><tr><td>rank</td><td>action</td><td>sum</td><td>group</td></tr>'
+		top10_html = '<h1 id="top10_action">十大動作</h1><br><table border="1"><tr><td>排名</td><td>動作</td><td>總和</td><td>群組</td></tr>'
 		i = 0
 		for row in self.conn.cursor().execute('SELECT action, sum(aggregation) FROM syslog GROUP BY action ORDER BY sum(aggregation) DESC LIMIT 10'):
 			j = 0
@@ -99,7 +99,7 @@ class xmlOutputter:
 			top10_node = ET.SubElement(top10_xml, 'action', attrib={'rank': str(i), 'sum': str(row[1])})
 			top10_node.text = str(row[0])
 			top10_html += '<tr><td>{}</td><td>{}</td><td>{}</td>'.format(i, row[0], row[1])
-			top10_html += '<td><table border="1"><tr><td>rank</td><td>source_ip</td><td>destination_ip</td><td>destination_port</td><td>total</td></tr>'
+			top10_html += '<td><table border="1"><tr><td>排名</td><td>來源IP</td><td>目標IP</td><td>目標Port</td><td>合計</td></tr>'
 			for row2 in self.conn.cursor().execute('SELECT source_ip, destination_ip, destination_port, sum(aggregation) FROM syslog WHERE action=? GROUP BY source_ip, destination_ip, destination_port ORDER BY sum(aggregation) DESC LIMIT 10', (row[0],)):
 				j = j + 1
 				group_node = ET.SubElement(top10_node, 'group', attrib={'rank': str(j)})
@@ -116,7 +116,7 @@ class xmlOutputter:
 	def top10_name(self):
 		self.timer.start('Producing top10_name')
 		top10_xml = ET.SubElement(self.root, 'top10_name')
-		top10_html = '<h1 id="top10_name">top10_name</h1><br><table border="1"><tr><td>rank</td><td>name</td><td>sum</td><td>group</td></tr>'
+		top10_html = '<h1 id="top10_name">十大名稱</h1><br><table border="1"><tr><td>排名</td><td>名稱</td><td>總和</td><td>群組</td></tr>'
 		i = 0
 		for row in self.conn.cursor().execute('SELECT name, sum(aggregation) FROM syslog GROUP BY name ORDER BY sum(aggregation) DESC LIMIT 10'):
 			j = 0
@@ -124,7 +124,7 @@ class xmlOutputter:
 			top10_node = ET.SubElement(top10_xml, 'name', attrib={'rank': str(i), 'sum': str(row[1])})
 			top10_node.text = str(row[0])
 			top10_html += '<tr><td>{}</td><td>{}</td><td>{}</td>'.format(i, row[0], row[1])
-			top10_html += '<td><table border="1"><tr><td>rank</td><td>source_ip</td><td>destination_ip</td><td>destination_port</td><td>action</td><td>total</td></tr>'
+			top10_html += '<td><table border="1"><tr><td>排名</td><td>來源IP</td><td>目標IP</td><td>目標Port</td><td>動作</td><td>合計</td></tr>'
 			for row2 in self.conn.cursor().execute('SELECT source_ip, destination_ip, destination_port, action, sum(aggregation) FROM syslog WHERE name=? GROUP BY source_ip, destination_ip, destination_port, action ORDER BY sum(aggregation) DESC LIMIT 10', (row[0],)):
 				j = j + 1
 				group_node = ET.SubElement(top10_node, 'group', attrib={'rank': str(j)})
@@ -142,7 +142,7 @@ class xmlOutputter:
 	def malicious_entry(self):
 		self.timer.start('Producing malicious_entry')
 		entry_xml = ET.SubElement(self.root, 'malicious_entry')
-		entry_html = '<h1 id="malicious_entry">malicious_entry</h1><br><table border="1"><tr><td>index</td><td>name</td><td>source_ip</td><td>destination_ip</td><td>destination_port</td><td>action</td><td>aggregation</td><td>rawdata</td></tr>'
+		entry_html = '<h1 id="malicious_entry">惡意連線記錄</h1><br><table border="1"><tr><td>序號</td><td>名稱</td><td>來源IP</td><td>目標IP</td><td>目標Port</td><td>動作</td><td>彙整</td><td>原始事件</td></tr>'
 		i = 0
 		for row in self.conn.cursor().execute('SELECT source_ip, destination_ip FROM syslog GROUP BY source_ip, destination_ip'):
 			if self.mapper.malicious_check(row[0]) or self.mapper.malicious_check(row[1]):
